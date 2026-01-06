@@ -1,0 +1,13 @@
+{
+  "routes": [
+    {
+      "src": "/auth/callback",
+      "dest": "/auth/callback.html"
+    },
+    {
+      "src": "/auth/callback.html",
+      "dest": "/auth/callback.html"
+    }
+  ]
+}
+
