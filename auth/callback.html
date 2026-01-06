@@ -134,20 +134,37 @@
   </div>
 
   <script>
-    // Extract query parameters from current URL
+    // Extract parameters from both query string and hash fragment
+    // Supabase may redirect with tokens in hash fragment (#access_token=...) or query params (?code=...)
     const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const tokenHash = urlParams.get('token_hash');
-    const type = urlParams.get('type');
-    const error = urlParams.get('error');
-    const errorDescription = urlParams.get('error_description');
+    const hashParams = new URLSearchParams(window.location.hash.substring(1)); // Remove the '#' from hash
+    
+    // Try query params first, then hash fragment
+    const code = urlParams.get('code') || hashParams.get('code');
+    const tokenHash = urlParams.get('token_hash') || hashParams.get('token_hash');
+    const type = urlParams.get('type') || hashParams.get('type');
+    const error = urlParams.get('error') || hashParams.get('error');
+    const errorDescription = urlParams.get('error_description') || hashParams.get('error_description');
+    
+    // Also check for hash fragment tokens (OAuth implicit flow)
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+    const expiresAt = hashParams.get('expires_at');
 
     // Build deep link URL with all params
     function buildDeepLink() {
       const params = new URLSearchParams();
       
+      // Prefer code/token_hash flow (authorization code)
       if (code) params.set('code', code);
       if (tokenHash) params.set('token_hash', tokenHash);
+      
+      // If we have hash fragment tokens, pass them to app
+      // The app can use these directly to establish session
+      if (accessToken) params.set('access_token', accessToken);
+      if (refreshToken) params.set('refresh_token', refreshToken);
+      if (expiresAt) params.set('expires_at', expiresAt);
+      
       if (type) params.set('type', type);
       if (error) params.set('error', error);
       if (errorDescription) params.set('error_description', errorDescription);
@@ -196,7 +213,7 @@
       // Small delay to ensure page is fully loaded
       setTimeout(() => {
         // Only auto-open if we have valid params
-        if (code || tokenHash) {
+        if (code || tokenHash || accessToken) {
           // Try opening, but button is still the primary action
           // Some iOS versions may block auto-redirect, so button is fallback
         }
