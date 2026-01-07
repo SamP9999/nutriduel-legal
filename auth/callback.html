@@ -180,6 +180,9 @@
       // Log for debugging (remove in production if needed)
       console.log('[Callback Bridge] Opening app with deep link:', deepLink);
       
+      // Temporary: Show alert with deep link URL for debugging
+      alert('Deep link: ' + deepLink);
+      
       // Attempt to open the app
       window.location.href = deepLink;
       
